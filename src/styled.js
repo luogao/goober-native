@@ -22,30 +22,35 @@ function styled(tag, forwardRef) {
 
     return function wrapper() {
         let _args = arguments;
-
         function Styled(props, ref) {
             // Grab a shallow copy of the props
             let _props = Object.assign({}, props);
 
             // Keep a local reference to the previous className
             let _previousClassName = _props.className || Styled.className;
-
             // _ctx.p: is the props sent to the context
             _ctx.p = Object.assign({ theme: useTheme && useTheme() }, _props);
+
+            console.log('old styled 😊😊😊😊😊', _props, _props.style);
+
+            _ctx.style = _props.style || Object.assign({}, _props.style);
 
             // Set a flag if the current components had a previous className
             // similar to goober. This is the append/prepend flag
             // The _empty_ space compresses better than `\s`
             _ctx.o = / *go\d+/.test(_previousClassName);
+            const cssObj = css.apply(_ctx, _args);
 
             _props.className =
-                // Define the new className
-                css.apply(_ctx, _args) + (_previousClassName ? ' ' + _previousClassName : '');
+                cssObj.className + (_previousClassName ? ' ' + _previousClassName : '');
+            // Define the new className
 
             // If the forwardRef fun is defined we have the ref
             if (forwardRef) {
                 _props.ref = ref;
             }
+
+            _props.style = _ctx.style = cssObj.RNStyle;
 
             // Assign the _as with the provided `tag` value
             let _as = tag;
@@ -62,6 +67,7 @@ function styled(tag, forwardRef) {
             if (fwdProp && _as[0]) {
                 fwdProp(_props);
             }
+            console.log({ _props: _props.style });
 
             return h(_as, _props);
         }

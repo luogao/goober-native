@@ -2,7 +2,9 @@ import { toHash } from './to-hash';
 import { update } from './update';
 import { astish } from './astish';
 import { parse } from './parse';
+import transformDeclPairs from 'css-to-react-native';
 
+let generated = {};
 /**
  * In-memory cache.
  */
@@ -30,12 +32,12 @@ let stringify = (data) => {
  * @param {Object} global Global flag
  * @param {Boolean} append Append or not
  * @param {Boolean} keyframes Keyframes mode. The input is the keyframes body that needs to be wrapped.
+ * @param {Object} RNStyle
  * @returns {String}
  */
-export let hash = (compiled, sheet, global, append, keyframes) => {
+export let hash = (compiled, sheet, global, append, keyframes, RNStyle) => {
     // Get a string representation of the object or the value that is called 'compiled'
     let stringifiedCompiled = stringify(compiled);
-
     // Retrieve the className from cache or hash it in place
     let className =
         cache[stringifiedCompiled] || (cache[stringifiedCompiled] = toHash(stringifiedCompiled));
@@ -62,6 +64,32 @@ export let hash = (compiled, sheet, global, append, keyframes) => {
     // add or update
     update(cache[className], sheet, append, cssToReplace);
 
+    // RN currently does not support differing values for the corner radii of Image
+    // components (but does for View). It is almost impossible to tell whether we'll have
+    // support, so we'll just disable multiple values here.
+    // https://github.com/styled-components/css-to-react-native/issues/11
+    const css = cache[className].replace(`.${className}{`, '').replace('}', '');
+    const declPairs = css
+        .split(';')
+        .filter((cssRule) => cssRule)
+        .map((cssRule) => cssRule.split(':'));
+
+    const styleObject = transformDeclPairs(declPairs, [
+        'borderRadius',
+        'borderWidth',
+        'borderColor',
+        'borderStyle'
+    ]);
+
+    const styles = Object.assign(
+        {
+            generated: styleObject
+        },
+        {}
+    );
+
+    RNStyle = RNStyle ? { ...styles.generated, ...RNStyle } : styles.generated;
+
     // return hash
-    return className;
+    return { className, RNStyle };
 };

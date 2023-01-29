@@ -9,8 +9,7 @@ import { getSheet } from './core/get-sheet';
 function css(val) {
     let ctx = this || {};
     let _val = val.call ? val(ctx.p) : val;
-
-    return hash(
+    const _hash = hash(
         _val.unshift
             ? _val.raw
                 ? // Tagged templates
@@ -21,8 +20,10 @@ function css(val) {
         getSheet(ctx.target),
         ctx.g,
         ctx.o,
-        ctx.k
+        ctx.k,
+        ctx.style
     );
+    return _hash;
 }
 
 /**

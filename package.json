@@ -8,6 +8,7 @@
   "umd:main": "dist/goober.umd.js",
   "source": "src/index.js",
   "unpkg": "dist/goober.umd.js",
+  "react-native": "dist/goober.umd.js",
   "types": "goober.d.ts",
   "type": "module",
   "files": [
@@ -71,14 +72,15 @@
     "build:prefixer": "cd ./prefixer && npm run build",
     "build:global": "cd ./global && npm run build",
     "build:should-forward-prop": "cd ./should-forward-prop && npm run build",
-    "build:core": "npm run clean && npm run build:dist && npm run size-check",
+    "build:core": "npm run clean && npm run build:dist",
     "build:lib": "microbundle --entry src/index.js --name goober --no-sourcemap --generateTypes false",
     "build:dist": "npm run build:lib -- --output dist",
     "build:debug": "npm run build:lib -- --output debug --no-compress",
     "dev": "npm run clean && microbundle watch --entry src/index.js --output dist --name goober",
     "sandbox": "wmr --public sandbox/wmr",
     "deploy": "npm run build && npm publish",
-    "format": "prettier \"**/*.{js,ts,tsx,md}\" --write"
+    "format": "prettier \"**/*.{js,ts,tsx,md}\" --write",
+    "prepublish": "npm run build"
   },
   "keywords": [
     "css-in-js",
@@ -97,13 +99,14 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@babel/runtime": "7.11.2",
     "@ampproject/filesize": "^4.0.0",
     "@babel/core": "^7.2.2",
     "@babel/plugin-transform-react-jsx": "^7.7.0",
     "@babel/preset-env": "^7.3.1",
     "@emotion/core": "^11.0.0",
-    "@emotion/styled": "^11.0.0",
     "@emotion/react": "^11.1.4",
+    "@emotion/styled": "^11.0.0",
     "@types/react": "^16.9.34",
     "babel-jest": "^24.1.0",
     "benchmark": "^2.1.4",
@@ -146,5 +149,8 @@
   "collective": {
     "type": "opencollective",
     "url": "https://opencollective.com/goober"
+  },
+  "dependencies": {
+    "css-to-react-native": "^3.1.0"
   }
 }
