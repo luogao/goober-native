@@ -1,6 +1,5 @@
 import { hash } from './core/hash';
 import { compile } from './core/compile';
-import { getSheet } from './core/get-sheet';
 
 /**
  * css entry
@@ -17,7 +16,6 @@ function css(val) {
                 : // Regular arrays
                   _val.reduce((o, i) => Object.assign(o, i && i.call ? i(ctx.p) : i), {})
             : _val,
-        getSheet(ctx.target),
         ctx.g,
         ctx.o,
         ctx.k,

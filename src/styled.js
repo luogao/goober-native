@@ -1,23 +1,35 @@
 import { css } from './css';
 import { parse } from './core/parse';
 
-let h, useTheme, fwdProp;
-function setup(pragma, prefix, theme, forwardProps) {
+let h, useTheme, fwdProp, fwdRef;
+let withMemo = function (comp) {
+    return comp;
+};
+
+/**
+ *
+ * @param {*} pragma
+ * @param {*} config
+ */
+function setup(
+    pragma,
+    { prefix = '', theme = null, forwardProps = null, forwardRef = null, memo = withMemo } = {}
+) {
     // This one needs to stay in here, so we won't have cyclic dependencies
     parse.p = prefix;
-
     // These are scope to this context
     h = pragma;
     useTheme = theme;
     fwdProp = forwardProps;
+    fwdRef = forwardRef;
+    withMemo = memo;
 }
 
 /**
  * styled function
  * @param {string} tag
- * @param {function} forwardRef
  */
-function styled(tag, forwardRef) {
+function styled(tag) {
     let _ctx = this || {};
 
     return function wrapper() {
@@ -26,27 +38,18 @@ function styled(tag, forwardRef) {
             // Grab a shallow copy of the props
             let _props = Object.assign({}, props);
 
-            // Keep a local reference to the previous className
-            let _previousClassName = _props.className || Styled.className;
             // _ctx.p: is the props sent to the context
             _ctx.p = Object.assign({ theme: useTheme && useTheme() }, _props);
-
-            console.log('old styled 😊😊😊😊😊', _props, _props.style);
 
             _ctx.style = _props.style || Object.assign({}, _props.style);
 
             // Set a flag if the current components had a previous className
             // similar to goober. This is the append/prepend flag
             // The _empty_ space compresses better than `\s`
-            _ctx.o = / *go\d+/.test(_previousClassName);
             const cssObj = css.apply(_ctx, _args);
 
-            _props.className =
-                cssObj.className + (_previousClassName ? ' ' + _previousClassName : '');
-            // Define the new className
-
-            // If the forwardRef fun is defined we have the ref
-            if (forwardRef) {
+            // If the fwdRef fun is defined we have the ref
+            if (fwdRef && ref && (typeof ref === 'function' || ref.hasOwnProperty('current'))) {
                 _props.ref = ref;
             }
 
@@ -67,12 +70,12 @@ function styled(tag, forwardRef) {
             if (fwdProp && _as[0]) {
                 fwdProp(_props);
             }
-            console.log({ _props: _props.style });
 
             return h(_as, _props);
         }
 
-        return forwardRef ? forwardRef(Styled) : Styled;
+        // ref 转发
+        return withMemo(fwdRef && typeof fwdRef === 'function' ? fwdRef(Styled) : Styled);
     };
 }
 

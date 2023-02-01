@@ -28,19 +28,20 @@ let stringify = (data) => {
 /**
  * Generates the needed className
  * @param {String|Object} compiled
- * @param {Object} sheet StyleSheet target
  * @param {Object} global Global flag
  * @param {Boolean} append Append or not
  * @param {Boolean} keyframes Keyframes mode. The input is the keyframes body that needs to be wrapped.
  * @param {Object} RNStyle
  * @returns {String}
  */
-export let hash = (compiled, sheet, global, append, keyframes, RNStyle) => {
+export let hash = (compiled, global, append, keyframes, RNStyle) => {
     // Get a string representation of the object or the value that is called 'compiled'
     let stringifiedCompiled = stringify(compiled);
     // Retrieve the className from cache or hash it in place
     let className =
         cache[stringifiedCompiled] || (cache[stringifiedCompiled] = toHash(stringifiedCompiled));
+
+    console.log({ stringifiedCompiled });
 
     // If there's no entry for the current className
     if (!cache[className]) {
@@ -62,7 +63,7 @@ export let hash = (compiled, sheet, global, append, keyframes, RNStyle) => {
     if (global) cache.g = cache[className];
 
     // add or update
-    update(cache[className], sheet, append, cssToReplace);
+    // update(cache[className], sheet, append, cssToReplace);
 
     // RN currently does not support differing values for the corner radii of Image
     // components (but does for View). It is almost impossible to tell whether we'll have
@@ -81,14 +82,9 @@ export let hash = (compiled, sheet, global, append, keyframes, RNStyle) => {
         'borderStyle'
     ]);
 
-    const styles = Object.assign(
-        {
-            generated: styleObject
-        },
-        {}
-    );
+    const styles = Object.assign(styleObject, {});
 
-    RNStyle = RNStyle ? { ...styles.generated, ...RNStyle } : styles.generated;
+    RNStyle = RNStyle ? { ...styles, ...RNStyle } : styles.generated;
 
     // return hash
     return { className, RNStyle };
